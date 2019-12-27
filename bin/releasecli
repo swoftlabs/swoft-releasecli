@@ -1,0 +1,38 @@
+#!/usr/bin/env php
+<?php
+/**
+ * Internal develop tool for swoft
+ */
+
+use SwoftLabs\ReleaseCli\Command\DeleteRemoteTag;
+use SwoftLabs\ReleaseCli\Command\GenReadme;
+use SwoftLabs\ReleaseCli\Command\GenVersion;
+use SwoftLabs\ReleaseCli\Command\GitAddRemote;
+use SwoftLabs\ReleaseCli\Command\GitFindTag;
+use SwoftLabs\ReleaseCli\Command\GitForcePush;
+use SwoftLabs\ReleaseCli\Command\GitReleaseTag;
+use SwoftLabs\ReleaseCli\Command\GitSubtreePull;
+use SwoftLabs\ReleaseCli\Command\GitSubtreePush;
+use SwoftLabs\ReleaseCli\Command\ListComponents;
+use SwoftLabs\ReleaseCli\Command\UpdateSwooleVer;
+use Toolkit\Cli\App;
+
+require dirname(__DIR__) . '/test/bootstrap.php';
+
+define('BASE_PATH', dirname(__DIR__));
+
+$cli = new App();
+$cli->addByConfig($gi = new GitFindTag(), $gi->getHelpConfig());
+$cli->addByConfig($drt = new DeleteRemoteTag(), $drt->getHelpConfig());
+$cli->addByConfig($grt = new GitReleaseTag(), $grt->getHelpConfig());
+$cli->addByConfig($gar = new GitAddRemote(), $gar->getHelpConfig());
+$cli->addByConfig($gfp = new GitForcePush(), $gfp->getHelpConfig());
+$cli->addByConfig($gsp1 = new GitSubtreePush(), $gsp1->getHelpConfig());
+$cli->addByConfig($gsp2 = new GitSubtreePull(), $gsp2->getHelpConfig());
+
+$cli->addByConfig($cmd = new GenReadme(), $cmd->getHelpConfig());
+$cli->addByConfig($cmd = new GenVersion(), $cmd->getHelpConfig());
+$cli->addByConfig($cmd = new UpdateSwooleVer(), $cmd->getHelpConfig());
+$cli->addByConfig($cmd = new ListComponents(), $cmd->getHelpConfig());
+
+$cli->run();
