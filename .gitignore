@@ -7,9 +7,9 @@
 runtime/
 vendor/
 *.lock
+*.phar
 .phpintel/
 .env
 .phpstorm.meta.php
 .DS_Store
-public/devtool/
 bin/php-cs-fixer

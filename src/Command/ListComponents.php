@@ -17,6 +17,9 @@ class ListComponents
     public function getHelpConfig(): array
     {
         $help = <<<STR
+Options:
+  --info    Output some information
+
 Example:
   {{command}}
 
@@ -30,10 +33,9 @@ STR;
         ];
     }
 
-
     public function __invoke(App $app): void
     {
-        $libsDir = BASE_PATH . '/src/';
+        $libsDir = $app->getPwd() . '/src/';
 
         Color::println('Components:', 'cyan');
         $flags   = GLOB_ONLYDIR | GLOB_MARK;

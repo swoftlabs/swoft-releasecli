@@ -19,10 +19,9 @@
   "require": {
     "php": ">7.1.0",
     "swoft/stdlib": "~2.0.0",
-    "toolkit/cli-utils": "~1.0"
+    "toolkit/cli-utils": "dev-master as 1.0"
   },
   "require-dev": {
-    "phpunit/phpunit": "^7.5"
   },
   "autoload": {
     "psr-4": {
@@ -31,7 +30,13 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "SwoftLabsTest\\ReleaseCli\\": "test/unit"
+      "SwoftLabsTest\\ReleaseCli\\": "test/"
+    }
+  },
+  "repositories": {
+    "packagist": {
+      "type": "composer",
+      "url": "https://mirrors.aliyun.com/composer/"
     }
   },
   "scripts": {
