@@ -2,9 +2,9 @@
 
 namespace SwoftLabs\ReleaseCli\Command;
 
-use Swoft\Console\Helper\Show;
 use Swoft\Stdlib\Helper\Sys;
 use Toolkit\Cli\App;
+use Toolkit\Cli\Color;
 use function array_pop;
 use function explode;
 use function implode;
@@ -57,7 +57,7 @@ STR;
 
         $tagName = $this->findTag($dir, !$onlyTag);
         if (!$tagName) {
-            Show::error('No any tags of the project', -2);
+            Color::println('No any tags of the project', 'error');
             return;
         }
 
@@ -77,7 +77,7 @@ STR;
             return;
         }
 
-        Show::writef("<info>$title</info>", $tagName);
+        Color::printf("<info>$title</info> $tagName\n");
     }
 
     /**
@@ -95,11 +95,7 @@ STR;
         $cmd = 'git describe --tags $(git rev-list --tags --max-count=1)';
 
         if ($showInfo) {
-            $info = [
-                'command' => $cmd,
-                'workDir' => $workDir,
-            ];
-            Show::aList($info, 'info');
+            Color::printf("Info:\n  Command <info>%s</info>\n  WorkDir <info>%s</info>\n", $cmd, $workDir);
         }
 
         [$code, $tagName,] = Sys::run($cmd, $workDir);
