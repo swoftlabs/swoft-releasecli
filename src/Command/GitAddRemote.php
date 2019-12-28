@@ -51,7 +51,7 @@ STR;
             $check = "git remote -v | grep swoft-{$name}.git";
             Color::println('> ' . $check, 'yellow');
 
-            [$code, ,] = Sys::run($check, $this->baseDir);
+            [$code, ,] = Sys::run($check, $this->repoDir);
             if ($code === 0) {
                 Color::println("The remote '{$name}' exist, skip add");
                 continue;
@@ -60,7 +60,7 @@ STR;
             $cmd = "git remote add $name $prefix{$name}.git";
             Color::println('> ' . $cmd, 'yellow');
 
-            [$code, $ret,] = Sys::run($cmd, $this->baseDir);
+            [$code, $ret,] = Sys::run($cmd, $this->repoDir);
             if ($code !== 0) {
                 echo "Add remote error for '{$name}'. Return: $ret\n";
                 continue;

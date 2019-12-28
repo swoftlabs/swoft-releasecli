@@ -30,6 +30,11 @@ abstract class BaseCommand
     protected $libsDir;
 
     /**
+     * @var string
+     */
+    protected $repoDir;
+
+    /**
      * @var bool
      */
     protected $debug = false;
@@ -42,7 +47,8 @@ abstract class BaseCommand
     public function __construct()
     {
         $this->baseDir = BASE_PATH;
-        $this->libsDir = BASE_PATH . '/src/';
+        $this->repoDir = App::$i->getPwd();
+        $this->libsDir = $this->repoDir . '/src/';
         $this->cpuNum  = swoole_cpu_num();
     }
 

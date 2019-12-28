@@ -66,7 +66,7 @@ STR;
 
         // operate the component project
         if ($app->getArg(0) === self::MAIN) {
-            self::doTagAndPush('component', $newTag, $this->baseDir);
+            self::doTagAndPush('component', $newTag, $this->repoDir);
             Color::println("\nRelease Tag({$newTag}) Complete", 'cyan');
             return;
         }
