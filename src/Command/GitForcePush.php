@@ -4,9 +4,18 @@ namespace SwoftLabs\ReleaseCli\Command;
 
 use Swoft\Console\Helper\Show;
 use SwoftLabs\ReleaseCli\CoScheduler;
+use SwoftLabs\ReleaseCli\ProcessPool;
 use Swoole\Coroutine;
+use Swoole\Process\Pool;
+use Swoole\Table;
 use Toolkit\Cli\App;
 use Toolkit\Cli\Color;
+use function array_chunk;
+use function basename;
+use function ceil;
+use function count;
+use function floor;
+use function sprintf;
 
 /**
  * Class GitForcePush
@@ -15,6 +24,8 @@ use Toolkit\Cli\Color;
  */
 class GitForcePush extends BaseCommand
 {
+    protected const TPL = 'git push %s `git subtree split --prefix src/%s master`:%s --force';
+
     public function getHelpConfig(): array
     {
         $help = <<<STR
@@ -24,6 +35,7 @@ Arguments:
 Options:
   --all         Apply for all components
   --debug       Open debug mode
+  --mode [p|c]  Run mode. allow p: multi-process c: multi-coroutine
 
 Example:
   {{fullCmd}} --all
@@ -45,36 +57,129 @@ STR;
         $targetBranch = 'master';
         $this->debug  = $app->getBoolOpt('debug');
 
+        $subDirs = $this->allComponents($app);
+        if (count($subDirs) === 1) {
+            $name = basename($subDirs[0]);
+            $cmd  = sprintf(self::TPL, $name, $name, $targetBranch);
+            $ok   = $this->pushToRepo($cmd, $name);
+
+            $result[$name] = $ok ? 'OK' : 'FAIL';
+        } elseif ($app->getStrOpt('mode', 'p') === 'p') {
+            $result = $this->processRun($subDirs, $targetBranch);
+        } else {
+            $result = $this->coroutineRun($subDirs, $targetBranch);
+        }
+
+        Color::println("\nForce Push Complete", 'cyan');
+        if ($result) {
+            Show::aList($result);
+        }
+    }
+
+    protected function coroutineRun(array $subDirs, string $targetBranch): array
+    {
         $result = [];
         $runner = CoScheduler::new();
 
         // force push:
         // git push tcp-server `git subtree split --prefix src/tcp-server master`:master --force
-        foreach ($this->findComponents($app) as $dir) {
+        foreach ($subDirs as $dir) {
             $name = basename($dir);
             // 先分割，在强推上去
             $cmd = "git push {$name} `git subtree split --prefix src/{$name} master`:{$targetBranch} --force";
 
             $runner->add(function () use ($name, $cmd, &$result) {
-                Color::println("\n====== Push the component:【{$name}】");
-                Color::println("> $cmd", 'yellow');
+                $ok            = $this->pushToRepo($cmd, $name);
+                $result[$name] = $ok ? 'OK' : 'FAIL';
 
-                $ret = Coroutine::exec($cmd);
-                if ((int)$ret['code'] !== 0) {
-                    $msg = "Push to remote fail of the {$name}. Output: {$ret['output']}";
-                    Color::println($msg, 'error');
-                    $result[$name] = 'Fail';
-                    return;
-                }
-
-                $result[$name] = 'OK';
-                Color::println("- Complete for {$name}\n", 'cyan');
                 Coroutine::sleep(1);
             });
         }
 
         $runner->start();
-        Color::println("\nForce Push Complete", 'cyan');
-        Show::aList($result);
+
+        return $result;
+    }
+
+    /**
+     * @param array  $subDirs
+     * @param string $targetBranch
+     *
+     * @return array
+     */
+    protected function processRun(array $subDirs, string $targetBranch): array
+    {
+        $results = [];
+        $workNum = (int)ceil($this->cpuNum * 1.5);
+
+        $allNum = count($subDirs);
+        $ckSize = (int)floor($allNum / $workNum);
+        if ($ckSize < 1) {
+            $ckSize  = 1;
+            $workNum = $allNum;
+        }
+
+        $chunks = array_chunk($subDirs, $ckSize);
+
+        $table = new Table(48);
+        $table->column('name', Table::TYPE_STRING, 16);
+        $table->column('value', Table::TYPE_STRING, 8);
+        $table->create();
+
+        $pool = ProcessPool::new($workNum);
+        $pool->onStart(function (Pool $pool, int $workerId) use ($table, $chunks, $targetBranch) {
+            $dirs = $chunks[$workerId] ?? [];
+            if (!$dirs) {
+                return;
+            }
+
+            // force push:
+            // git push tcp-server `git subtree split --prefix src/tcp-server master`:master --force
+            foreach ($dirs as $dir) {
+                $name = basename($dir);
+                // 先分割，在强推上去
+                $cmd = sprintf(self::TPL, $name, $name, $targetBranch);
+                $ok  = $this->pushToRepo($cmd, $name);
+
+                $table->set($name, [
+                    'name'  => $name,
+                    'value' => $ok ? 'OK' : 'FAIL',
+                ]);
+            }
+
+        });
+
+        $pool->start();
+
+        /** @var Table\Row $row */
+        foreach ($table as $row) {
+            $results[$row->key] = $row->value['value'];
+        }
+
+        $table->destroy();
+
+        return $results;
+    }
+
+    /**
+     * @param string $cmd
+     * @param string $name
+     *
+     * @return bool
+     */
+    protected function pushToRepo(string $cmd, string $name): bool
+    {
+        Color::println("\n====== Push the component:【{$name}】");
+        Color::println("> $cmd", 'yellow');
+
+        $ret = Coroutine::exec($cmd);
+        if ((int)$ret['code'] !== 0) {
+            $msg = "Push to remote fail of the {$name}. Output: {$ret['output']}";
+            Color::println($msg, 'error');
+            return false;
+        }
+
+        Color::println("- Complete for {$name}\n", 'cyan');
+        return true;
     }
 }

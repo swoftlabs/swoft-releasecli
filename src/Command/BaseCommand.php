@@ -86,6 +86,41 @@ abstract class BaseCommand
     }
 
     /**
+     * @param App    $app
+     * @param string $allOpt Default is --all
+     *
+     * @return array
+     */
+    protected function allComponents(App $app, string $allOpt = 'all'): array
+    {
+        // For all components
+        if ($app->getOpt($allOpt, false)) {
+            $flags  = GLOB_ONLYDIR | GLOB_MARK;
+            $pattern = $this->libsDir . '*';
+
+            return glob($pattern, $flags);
+        }
+
+        // For some components
+        if (!$names = $app->getArgs()) {
+            throw new InvalidArgumentException('Please input component names arguments');
+        }
+
+        $dirs = [];
+        foreach ($names as $name) {
+            $dir = $this->libsDir . $name;
+            if (!is_dir($dir)) {
+                echo Color::render("Invalid component name: $name\n", 'error');
+                continue;
+            }
+
+            $dirs[] =  $dir . '/';
+        }
+
+        return $dirs;
+    }
+
+    /**
      * @param string $cmd
      * @param string $workDir
      * @param bool   $coRun
