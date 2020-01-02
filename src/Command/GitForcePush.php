@@ -137,7 +137,9 @@ STR;
         $pool->onStart(function (Pool $pool, int $workerId) use ($table, $subDirs, $atomic, $targetBranch) {
             // force push:
             // git push tcp-server `git subtree split --prefix src/tcp-server master`:master --force
-            while ($index = $atomic->get()) {
+            while ($num = $atomic->get()) {
+                $index = $atomic->sub(1);
+
                 $dir  = $subDirs[$index];
                 $name = basename($dir);
                 // 先分割，在强推上去
