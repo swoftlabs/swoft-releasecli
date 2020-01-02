@@ -5,6 +5,7 @@ namespace SwoftLabs\ReleaseCli\Command;
 use Swoft\Console\Helper\Show;
 use SwoftLabs\ReleaseCli\CoScheduler;
 use SwoftLabs\ReleaseCli\ProcessPool;
+use Swoole\Atomic;
 use Swoole\Coroutine;
 use Swoole\Process\Pool;
 use Swoole\Table;
@@ -52,13 +53,20 @@ STR;
         ];
     }
 
+    /**
+     * @param App $app
+     */
     public function __invoke(App $app)
     {
         $targetBranch = 'master';
         $this->debug  = $app->getBoolOpt('debug');
 
         $subDirs = $this->allComponents($app);
-        if (count($subDirs) === 1) {
+        $counts  = count($subDirs);
+
+        Color::println("will handled component number: $counts");
+
+        if ($counts === 1) {
             $name = basename($subDirs[0]);
             $cmd  = sprintf(self::TPL, $name, $name, $targetBranch);
             $ok   = $this->pushToRepo($cmd, $name);
@@ -89,8 +97,7 @@ STR;
             $cmd = "git push {$name} `git subtree split --prefix src/{$name} master`:{$targetBranch} --force";
 
             $runner->add(function () use ($name, $cmd, &$result) {
-                $ok            = $this->pushToRepo($cmd, $name);
-                $result[$name] = $ok ? 'OK' : 'FAIL';
+                $result[$name] = $this->pushToRepo($cmd, $name) ? 'OK' : 'FAIL';
 
                 Coroutine::sleep(1);
             });
@@ -109,17 +116,17 @@ STR;
      */
     protected function processRun(array $subDirs, string $targetBranch): array
     {
-        $results = [];
         $workNum = (int)ceil($this->cpuNum * 1.5);
+        $allNum  = count($subDirs);
 
-        $allNum = count($subDirs);
-        $ckSize = (int)floor($allNum / $workNum);
-        if ($ckSize < 1) {
-            $ckSize  = 1;
+        if ($allNum <= $workNum) {
             $workNum = $allNum;
         }
 
-        $chunks = array_chunk($subDirs, $ckSize);
+        Color::println("will started worker process number: $workNum");
+
+        $results = [];
+        $atomic  = new Atomic($allNum);
 
         $table = new Table(48);
         $table->column('name', Table::TYPE_STRING, 16);
@@ -127,15 +134,11 @@ STR;
         $table->create();
 
         $pool = ProcessPool::new($workNum);
-        $pool->onStart(function (Pool $pool, int $workerId) use ($table, $chunks, $targetBranch) {
-            $dirs = $chunks[$workerId] ?? [];
-            if (!$dirs) {
-                return;
-            }
-
+        $pool->onStart(function (Pool $pool, int $workerId) use ($table, $subDirs, $atomic, $targetBranch) {
             // force push:
             // git push tcp-server `git subtree split --prefix src/tcp-server master`:master --force
-            foreach ($dirs as $dir) {
+            while ($index = $atomic->get()) {
+                $dir  = $subDirs[$index];
                 $name = basename($dir);
                 // 先分割，在强推上去
                 $cmd = sprintf(self::TPL, $name, $name, $targetBranch);
@@ -146,7 +149,6 @@ STR;
                     'value' => $ok ? 'OK' : 'FAIL',
                 ]);
             }
-
         });
 
         $pool->start();
