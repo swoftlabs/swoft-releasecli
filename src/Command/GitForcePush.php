@@ -7,6 +7,7 @@ use SwoftLabs\ReleaseCli\CoScheduler;
 use SwoftLabs\ReleaseCli\ProcessPool;
 use Swoole\Atomic;
 use Swoole\Coroutine;
+use Swoole\Process;
 use Swoole\Process\Pool;
 use Swoole\Table;
 use Toolkit\Cli\App;
@@ -123,7 +124,7 @@ STR;
             $workNum = $allNum;
         }
 
-        Color::println("will started worker process number: $workNum");
+        Color::println("will started process number: $workNum");
 
         $results = [];
         $atomic  = new Atomic($allNum);
@@ -151,8 +152,11 @@ STR;
                     'value' => $ok ? 'OK' : 'FAIL',
                 ]);
             }
-        });
 
+            // SIGTERM=15
+            Process::kill(\getmypid(), 15);
+            Coroutine::sleep(3);
+        });
         $pool->start();
 
         /** @var Table\Row $row */

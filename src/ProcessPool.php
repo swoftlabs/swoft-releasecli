@@ -11,30 +11,12 @@ use function swoole_cpu_num;
  *
  * @package SwoftLabs\ReleaseCli
  */
-class ProcessPool
+class ProcessPool extends AbstractPool
 {
     /**
      * @var Pool
      */
     private $pool;
-
-    /**
-     * Worker logic handler. eg:
-     *
-     * function (Swoole\Process\Pool $pool, int $workerId) {
-     *      // do something
-     * }
-     *
-     * @var callable
-     */
-    private $startHandler;
-
-    /**
-     * On worker stop handler. see $startHandler
-     *
-     * @var callable
-     */
-    private $stopHandler;
 
     /**
      * @param int  $workerNum
@@ -63,22 +45,6 @@ class ProcessPool
         $this->pool = new Pool($workerNum, $ipcType, $msgQueueKey, $enableCoroutine);
     }
 
-    /**
-     * @param callable $handler
-     */
-    public function onStart(callable $handler): void
-    {
-        $this->startHandler = $handler;
-    }
-
-    /**
-     * @param callable $handler
-     */
-    public function onStop(callable $handler): void
-    {
-        $this->stopHandler = $handler;
-    }
-
     public function start(): void
     {
         if (!$this->startHandler) {
@@ -95,14 +61,6 @@ class ProcessPool
     }
 
     /**
-     * @return int
-     */
-    public function getBestWorkerNum(): int
-    {
-        return (int)ceil(swoole_cpu_num() * 1.5);
-    }
-
-    /**
      * @return Pool
      */
     public function getPool(): Pool
@@ -116,13 +74,5 @@ class ProcessPool
     public function setPool(Pool $pool): void
     {
         $this->pool = $pool;
-    }
-
-    /**
-     * @return callable
-     */
-    public function getStartHandler(): callable
-    {
-        return $this->startHandler;
     }
 }
