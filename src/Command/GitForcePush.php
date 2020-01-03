@@ -154,8 +154,8 @@ STR;
             }
 
             // SIGTERM=15
-            Process::kill(\getmypid(), 15);
-            Coroutine::sleep(3);
+            // Process::kill(\getmypid(), 15);
+            // Coroutine::sleep(3);
         });
         $pool->start();
 
