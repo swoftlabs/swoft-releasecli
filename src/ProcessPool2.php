@@ -3,7 +3,6 @@
 namespace SwoftLabs\ReleaseCli;
 
 use RuntimeException;
-use Swoole\Event;
 use Swoole\Process;
 
 /**
@@ -17,6 +16,11 @@ class ProcessPool2 extends AbstractPool
      * @var int
      */
     private $workerId = 0;
+
+    /**
+     * @var array [pid => wid]
+     */
+    private $pidMap = [];
 
     /**
      * @var int
@@ -43,6 +47,11 @@ class ProcessPool2 extends AbstractPool
      * @var bool
      */
     private $keepalive = false;
+
+    /**
+     * @var bool
+     */
+    private $blockWait = true;
 
     /**
      * @var Process[]
@@ -93,36 +102,67 @@ class ProcessPool2 extends AbstractPool
             throw new RuntimeException('the worker start handler is required before start');
         }
 
+        // create and start
         for ($i = 0; $i < $this->workerNum; $i++) {
-            $proc = new Process(function (Process $proc) use ($fn, $i) {
-                $this->workerId = $i;
-
-                $fn($this, $i);
-            }, $this->redirectIO, 0, $this->coroutine);
-
-            if ($this->msgQueueKey) {
-                $proc->useQueue($this->msgQueueKey);
-            }
-
-            $proc->start();
-            $this->workers[] = $proc;
+            $this->createProcess($i, $fn);
         }
 
-        // SIGCHLD = 17
-        Process::signal(17, function($signal) {
-            // 必须为false，非阻塞模式
-            while($ret =  Process::wait(false)) {
-                echo "PID={$ret['pid']}\n";
-
-                // on stop
-                if ($stopFunc = $this->stopHandler) {
-                    $stopFunc($this, $this->workerId);
-                }
+        // waiting
+        if ($this->blockWait) {
+            while ($ret = Process::wait()) {
+                $this->handleExit($ret, $fn);
             }
-        });
-        // Process::wait();
+        } else {
+            // SIGCHLD = 17
+            Process::signal(17, function () use ($fn) {
+                // 必须为false，非阻塞模式
+                while ($ret = Process::wait(false)) {
+                    $this->handleExit($ret, $fn);
+                }
+            });
+        }
 
-        Event::wait();
+        // Event::wait();
+    }
+
+    /**
+     * @param array    $ret
+     * @param callable $fn
+     */
+    protected function handleExit(array $ret, callable $fn): void
+    {
+        $wid = $this->workerId;
+
+        // on stop
+        if ($stopFunc = $this->stopHandler) {
+            $stopFunc($this, $wid, $ret);
+        }
+
+        if ($this->keepalive) {
+            $this->createProcess($wid, $fn);
+        }
+    }
+
+    /**
+     * @param int      $wid
+     * @param callable $fn
+     */
+    protected function createProcess(int $wid, callable $fn): void
+    {
+        $proc = new Process(function (Process $proc) use ($fn, $wid) {
+            $this->workerId = $wid;
+            // on start
+            $fn($this, $wid);
+        }, $this->redirectIO, 0, $this->coroutine);
+
+        if ($this->msgQueueKey) {
+            $proc->useQueue($this->msgQueueKey);
+        }
+
+        $proc->start();
+
+        $this->workers[$wid] = $proc;
+        $this->pidMap[$wid]  = $proc->pid;
     }
 
     /**
@@ -138,5 +178,45 @@ class ProcessPool2 extends AbstractPool
         }
 
         return $this->workers[$workerId];
+    }
+
+    /**
+     * @return int
+     */
+    public function getWorkerId(): int
+    {
+        return $this->workerId;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isBlockWait(): bool
+    {
+        return $this->blockWait;
+    }
+
+    /**
+     * @param bool $blockWait
+     */
+    public function setBlockWait(bool $blockWait): void
+    {
+        $this->blockWait = $blockWait;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isKeepalive(): bool
+    {
+        return $this->keepalive;
+    }
+
+    /**
+     * @param bool $keepalive
+     */
+    public function setKeepalive(bool $keepalive): void
+    {
+        $this->keepalive = $keepalive;
     }
 }

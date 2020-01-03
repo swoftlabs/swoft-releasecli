@@ -5,18 +5,16 @@ namespace SwoftLabs\ReleaseCli\Command;
 use Swoft\Console\Helper\Show;
 use SwoftLabs\ReleaseCli\CoScheduler;
 use SwoftLabs\ReleaseCli\ProcessPool;
+use SwoftLabs\ReleaseCli\ProcessPool2;
 use Swoole\Atomic;
 use Swoole\Coroutine;
-use Swoole\Process;
 use Swoole\Process\Pool;
 use Swoole\Table;
 use Toolkit\Cli\App;
 use Toolkit\Cli\Color;
-use function array_chunk;
 use function basename;
 use function ceil;
 use function count;
-use function floor;
 use function sprintf;
 
 /**
@@ -27,6 +25,16 @@ use function sprintf;
 class GitForcePush extends BaseCommand
 {
     protected const TPL = 'git push %s `git subtree split --prefix src/%s master`:%s --force';
+
+    /**
+     * @var array
+     */
+    private $subDirs;
+
+    /**
+     * @var string
+     */
+    private $branch;
 
     public function getHelpConfig(): array
     {
@@ -59,10 +67,10 @@ STR;
      */
     public function __invoke(App $app)
     {
-        $targetBranch = 'master';
+        $this->branch = $targetBranch = 'master';
         $this->debug  = $app->getBoolOpt('debug');
 
-        $subDirs = $this->allComponents($app);
+        $subDirs = $this->subDirs = $this->allComponents($app);
         $counts  = count($subDirs);
 
         Color::println("will handled component number: $counts");
@@ -74,9 +82,9 @@ STR;
 
             $result[$name] = $ok ? 'OK' : 'FAIL';
         } elseif ($app->getStrOpt('mode', 'p') === 'p') {
-            $result = $this->processRun($subDirs, $targetBranch);
+            $result = $this->processRun($subDirs);
         } else {
-            $result = $this->coroutineRun($subDirs, $targetBranch);
+            $result = $this->coroutineRun($subDirs);
         }
 
         Color::println("\nForce Push Complete", 'cyan');
@@ -85,17 +93,18 @@ STR;
         }
     }
 
-    protected function coroutineRun(array $subDirs, string $targetBranch): array
+    protected function coroutineRun(array $subDirs): array
     {
         $result = [];
         $runner = CoScheduler::new();
+        $branch = $this->branch;
 
         // force push:
         // git push tcp-server `git subtree split --prefix src/tcp-server master`:master --force
         foreach ($subDirs as $dir) {
             $name = basename($dir);
             // 先分割，在强推上去
-            $cmd = "git push {$name} `git subtree split --prefix src/{$name} master`:{$targetBranch} --force";
+            $cmd = "git push {$name} `git subtree split --prefix src/{$name} master`:{$branch} --force";
 
             $runner->add(function () use ($name, $cmd, &$result) {
                 $result[$name] = $this->pushToRepo($cmd, $name) ? 'OK' : 'FAIL';
@@ -111,11 +120,10 @@ STR;
 
     /**
      * @param array  $subDirs
-     * @param string $targetBranch
      *
      * @return array
      */
-    protected function processRun(array $subDirs, string $targetBranch): array
+    protected function processRun(array $subDirs): array
     {
         $workNum = (int)ceil($this->cpuNum * 1.5);
         $allNum  = count($subDirs);
@@ -134,14 +142,59 @@ STR;
         $table->column('value', Table::TYPE_STRING, 8);
         $table->create();
 
-        $pool = ProcessPool::new($workNum);
-        $pool->onStart(function (Pool $pool, int $workerId) use ($table, $subDirs, $atomic, $targetBranch) {
+        $this->useCustomPool($workNum, $table, $atomic);
+        // $this->useSwoolePool($workNum, $table, $atomic);
+
+        /** @var Table\Row $row */
+        foreach ($table as $row) {
+            $results[$row['name']] = $row['value'];
+        }
+
+        $table->destroy();
+
+        return $results;
+    }
+
+    protected function useCustomPool(int $workNum, Table $table, Atomic $atomic): void
+    {
+        $pool = ProcessPool2::new($workNum);
+        $pool->onStart(function (ProcessPool2 $pool, int $workerId) use ($table, $atomic) {
+            $targetBranch = $this->branch;
             // force push:
             // git push tcp-server `git subtree split --prefix src/tcp-server master`:master --force
             while ($num = $atomic->get()) {
                 $index = $atomic->sub(1);
 
-                $dir  = $subDirs[$index];
+                $dir  = $this->subDirs[$index];
+                $name = basename($dir);
+
+                // 先分割，在强推上去
+                $cmd = sprintf(self::TPL, $name, $name, $targetBranch);
+                $ok  = $this->pushToRepo($cmd, $name);
+
+                $table->set($name, [
+                    'name'  => $name,
+                    'value' => $ok ? 'OK' : 'FAIL',
+                ]);
+            }
+
+            echo "exit\n";
+        });
+
+        $pool->start();
+    }
+
+    protected function useSwoolePool(int $workNum, Table $table, Atomic $atomic): void
+    {
+        $pool = ProcessPool::new($workNum);
+        $pool->onStart(function (Pool $pool, int $workerId) use ($table, $atomic) {
+            $targetBranch = $this->branch;
+            // force push:
+            // git push tcp-server `git subtree split --prefix src/tcp-server master`:master --force
+            while ($num = $atomic->get()) {
+                $index = $atomic->sub(1);
+
+                $dir  = $this->subDirs[$index];
                 $name = basename($dir);
                 // 先分割，在强推上去
                 $cmd = sprintf(self::TPL, $name, $name, $targetBranch);
@@ -157,16 +210,8 @@ STR;
             // Process::kill(\getmypid(), 15);
             // Coroutine::sleep(3);
         });
+
         $pool->start();
-
-        /** @var Table\Row $row */
-        foreach ($table as $row) {
-            $results[$row->key] = $row->value['value'];
-        }
-
-        $table->destroy();
-
-        return $results;
     }
 
     /**
