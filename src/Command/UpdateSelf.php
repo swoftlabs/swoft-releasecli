@@ -10,9 +10,9 @@ use const GLOB_ONLYDIR;
 use const PHP_EOL;
 
 /**
- * Class ListComponents
+ * Class UpdateSelf
  */
-class ListComponents
+class UpdateSelf
 {
     public function getHelpConfig(): array
     {
@@ -21,13 +21,13 @@ Options:
   --info    Output some information
 
 Example:
-  {{fullCmd}}
+  {{command}}
 
 STR;
 
         return [
             'name'  => 'list',
-            'desc'  => 'list all swoft components in src/ dir',
+            'desc'  => 'update self to latest version',
             'help'  => $help,
         ];
     }

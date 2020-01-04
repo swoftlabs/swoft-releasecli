@@ -41,3 +41,8 @@ releasecli git:release --all -y -t v2.0.8
 php -d phar.readonly=0 ~/.composer/vendor/bin/swoftcli phar:pack -o=releasecli.phar
 ```
 
+## Dep Packages
+
+- https://github.com/php-toolkit/cli-utils
+- https://github.com/swoft-cloud/swoft-console
+- https://github.com/swoft-cloud/swoft-stelib
