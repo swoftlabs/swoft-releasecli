@@ -45,4 +45,4 @@ php -d phar.readonly=0 ~/.composer/vendor/bin/swoftcli phar:pack -o=releasecli.p
 
 - https://github.com/php-toolkit/cli-utils
 - https://github.com/swoft-cloud/swoft-console
-- https://github.com/swoft-cloud/swoft-stelib
+- https://github.com/swoft-cloud/swoft-stdlib
