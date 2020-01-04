@@ -15,18 +15,7 @@ help:
   update:	## Update current project code to latest by git pull
 update:
 	git checkout . && git pull
-
-  addrmt:	## Add the remote repository address of each component to the local remote
-addrmt:
-	php bin/releasecli git:addrmt --all
-
-  fpush:	## Push all update to remote sub-repo by git push with '--force'
-fpush:
-	php bin/releasecli git:fpush --all
-
-  release:	## Release all sub-repo to new tag version and push to remote repo. eg: tag=v2.0.3
-release:
-	php bin/releasecli tag:release --all -y -t $(TAG)
+	chmod a+x bin/releasecli
 
   sami:		## Gen classes docs by sami.phar
 classdoc:
@@ -36,5 +25,5 @@ classdoc:
 	php sami.phar update ./script/sami.doc.inc
 
   all:		## Run update, addrmt, fpush and release
-all: update addrmt fpush release
+all: update
 

@@ -3,45 +3,36 @@
 namespace SwoftLabs\ReleaseCli\Command;
 
 use Toolkit\Cli\App;
-use Toolkit\Cli\Color;
-use function basename;
-use const GLOB_MARK;
-use const GLOB_ONLYDIR;
-use const PHP_EOL;
 
 /**
  * Class UpdateSelf
  */
-class UpdateSelf
+class UpdateSelf extends BaseCommand
 {
     public function getHelpConfig(): array
     {
         $help = <<<STR
-Options:
-  --info    Output some information
-
 Example:
   {{command}}
 
 STR;
 
         return [
-            'name'  => 'list',
-            'desc'  => 'update self to latest version',
-            'help'  => $help,
+            'name' => 'upself',
+            'desc' => 'update self to latest by git pull',
+            'help' => $help,
         ];
     }
 
+    /**
+     * @param App $app
+     */
     public function __invoke(App $app): void
     {
-        $libsDir = $app->getPwd() . '/src/';
+        $cmd = "cd {$this->baseDir} && git checkout . && git pull";
 
-        Color::println('Components:', 'cyan');
-        $flags   = GLOB_ONLYDIR | GLOB_MARK;
-        $pattern = $libsDir . '*';
+        $ret = self::exec($cmd);
 
-        foreach (glob($pattern, $flags) as $item) {
-            echo basename($item), PHP_EOL;
-        }
+        echo $ret['output'];
     }
 }

@@ -12,6 +12,7 @@ use SwoftLabs\ReleaseCli\Command\GitFindTag;
 use SwoftLabs\ReleaseCli\Command\GitForcePush;
 use SwoftLabs\ReleaseCli\Command\GitReleaseTag;
 use SwoftLabs\ReleaseCli\Command\ListComponents;
+use SwoftLabs\ReleaseCli\Command\UpdateSelf;
 use SwoftLabs\ReleaseCli\Command\UpdateSwooleVer;
 use Toolkit\Cli\App;
 
@@ -32,5 +33,9 @@ $cli->addObject(new GenReadme());
 $cli->addObject(new GenVersion());
 $cli->addObject(new UpdateSwooleVer());
 $cli->addObject(new ListComponents());
+
+if (!defined('IN_PHAR') || !IN_PHAR) {
+    $cli->addObject(new UpdateSelf());
+}
 
 $cli->run();
