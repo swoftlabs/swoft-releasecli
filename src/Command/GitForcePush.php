@@ -180,8 +180,6 @@ STR;
                     'value' => $ok ? 'OK' : 'FAIL',
                 ]);
             }
-
-            echo "exit\n";
         });
 
         $pool->start();
