@@ -41,6 +41,7 @@ STR;
 
         Color::println('Add execute perm:');
 
-        self::exec("cd {$this->baseDir} && chmod a+x");
+        $binName = $app->getScriptName();
+        self::exec("cd {$this->baseDir} && chmod a+x bin/$binName");
     }
 }
