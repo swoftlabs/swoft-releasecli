@@ -2,9 +2,13 @@
 
 namespace SwoftLabs\ReleaseCli\Command;
 
+use Swoft\Console\Helper\Show;
 use Toolkit\Cli\App;
 use Toolkit\Cli\Color;
 use function basename;
+use function count;
+use function implode;
+use function sort;
 use const GLOB_MARK;
 use const GLOB_ONLYDIR;
 use const PHP_EOL;
@@ -18,7 +22,7 @@ class ListComponents
     {
         $help = <<<STR
 Options:
-  --info    Output some information
+  --inline    Output in one line
 
 Example:
   {{fullCmd}}
@@ -35,13 +39,23 @@ STR;
     public function __invoke(App $app): void
     {
         $libsDir = $app->getPwd() . '/src/';
-
-        Color::println('Components:', 'cyan');
-        $flags   = GLOB_ONLYDIR | GLOB_MARK;
         $pattern = $libsDir . '*';
+        $subDirs = glob($pattern, GLOB_ONLYDIR | GLOB_MARK);
 
-        foreach (glob($pattern, $flags) as $item) {
-            echo basename($item), PHP_EOL;
+        $total = count($subDirs);
+        Color::println("Components(total: $total):", 'cyan');
+
+        $names = [];
+        foreach ($subDirs as $item) {
+            $names[] = basename($item);
+        }
+
+        sort($names);
+
+        if ($app->getBoolOpt('inline')) {
+            echo implode(' ', $names), PHP_EOL;
+        } else {
+            echo implode("\n", $names), PHP_EOL;
         }
     }
 }
