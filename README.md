@@ -69,6 +69,13 @@ chmod a+x bin/releasecli
 php -d phar.readonly=0 ~/.composer/vendor/bin/swoftcli phar:pack -o=releasecli.phar
 ```
 
+## Uninstall
+
+```bash
+rm -f /usr/local/bin/releasecli
+rm -rf ~/swoft-releasecli
+```
+
 ## Dep Packages
 
 - https://github.com/php-toolkit/cli-utils
