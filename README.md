@@ -6,16 +6,26 @@ Swoft core and ext components release CLI tool package.
 
 ## Install
 
+**Install by script:**
+
 ```bash
+curl https://raw.githubusercontent.com/swoftlabs/swoft-releasecli/master/install.sh | bash
+```
+
+**Manual install:**
+
+```bash
+cd ~
 git clone https://github.com/swoftlabs/swoft-releasecli
 cd swoft-releasecli
 ln -s $PWD/bin/releasecli /usr/local/bin/releasecli
-chmod a+x /usr/local/bin/releasecli
+chmod a+x bin/releasecli
 ```
 
 ## Usage
 
-goto swoft components dir, then:
+
+Goto swoft components dir, then:
 
 ```bash
 # 1. add remote for all components
@@ -28,8 +38,18 @@ releasecli git:release --all -y -t v2.0.8
 
 ## Update
 
+**Builtin command:**
+
+Use builtin command
+
 ```bash
-cd swoft-releasecli
+releasecli upself
+```
+
+**Manual update:**
+
+```bash
+cd ~/swoft-releasecli
 git pull
 chmod a+x bin/releasecli
 ```
