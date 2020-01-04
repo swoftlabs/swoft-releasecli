@@ -43,5 +43,7 @@ STR;
 
         $binName = $app->getScriptName();
         self::exec("cd {$this->baseDir} && chmod a+x bin/$binName");
+
+        Color::println('Complete');
     }
 }
