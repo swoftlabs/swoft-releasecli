@@ -3,6 +3,7 @@
 namespace SwoftLabs\ReleaseCli\Command;
 
 use Toolkit\Cli\App;
+use Toolkit\Cli\Color;
 
 /**
  * Class UpdateSelf
@@ -29,10 +30,17 @@ STR;
      */
     public function __invoke(App $app): void
     {
+
+        Color::println('Update to latest:');
+
         $cmd = "cd {$this->baseDir} && git checkout . && git pull";
 
         $ret = self::exec($cmd);
 
         echo $ret['output'];
+
+        Color::println('Add execute perm:');
+
+        self::exec("cd {$this->baseDir} && chmod a+x");
     }
 }
