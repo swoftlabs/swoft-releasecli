@@ -4,6 +4,12 @@ Swoft core and ext components release CLI tool package.
 
 - Github: https://github.com/swoftlabs/swoft-releasecli
 
+**Required:**
+
+- git
+- php
+- composer
+
 ## Install
 
 **Install by script:**
@@ -18,6 +24,7 @@ curl https://raw.githubusercontent.com/swoftlabs/swoft-releasecli/master/install
 cd ~
 git clone https://github.com/swoftlabs/swoft-releasecli
 cd swoft-releasecli
+composer install
 ln -s $PWD/bin/releasecli /usr/local/bin/releasecli
 chmod a+x bin/releasecli
 ```
