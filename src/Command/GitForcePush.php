@@ -70,6 +70,9 @@ STR;
         $this->branch = $targetBranch = 'master';
         $this->debug  = $app->getBoolOpt('debug');
 
+        Color::println('update all codes to latest by git pull');
+        self::exec('git pull');
+
         $subDirs = $this->subDirs = $this->allComponents($app);
         $counts  = count($subDirs);
 
