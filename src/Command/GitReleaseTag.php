@@ -9,6 +9,7 @@ use SwoftLabs\ReleaseCli\CoScheduler;
 use Swoole\Coroutine;
 use Toolkit\Cli\App;
 use Toolkit\Cli\Color;
+use function count;
 use function sprintf;
 
 /**
@@ -101,8 +102,13 @@ STR;
         }
 
         $runner->start();
-        Color::println("\nRelease Tag({$newTag}) Complete", 'cyan');
-        Show::aList($this->result);
+
+        $total  = count($this->result);
+        $result = $this->result;
+        Color::println("\nRelease Tag({$newTag}) Complete(total: $total)", 'cyan');
+
+        ksort($result);
+        Show::aList($result);
     }
 
     /**

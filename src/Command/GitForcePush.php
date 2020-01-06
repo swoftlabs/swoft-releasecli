@@ -15,6 +15,7 @@ use Toolkit\Cli\Color;
 use function basename;
 use function ceil;
 use function count;
+use function ksort;
 use function sprintf;
 
 /**
@@ -90,8 +91,9 @@ STR;
             $result = $this->coroutineRun($subDirs);
         }
 
-        Color::println("\nForce Push Complete", 'cyan');
+        Color::println("\nForce Push Complete(total: $counts)", 'cyan');
         if ($result) {
+            ksort($result);
             Show::aList($result);
         }
     }
