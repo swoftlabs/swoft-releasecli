@@ -37,7 +37,9 @@ chmod a+x bin/releasecli
 
 ## Usage
 
-Goto swoft components dir, then:
+First use git to pull the latest swoft-components or swoft-ext to the local, go to the repository directory.
+
+Execute:
 
 ```bash
 # 1. add remote for all components
