@@ -44,6 +44,9 @@ STR;
     {
         $prefix = self::REMOTE_PREFIX;
 
+        Color::println('update codes to latest by git pull');
+        self::exec('git checkout . && git pull');
+
         foreach ($this->findComponents($app) as $dir) {
             $name = basename($dir);
             Color::println("===== Add remote for $name");

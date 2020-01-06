@@ -1,9 +1,9 @@
 # Swoft Release CLI
 
-Swoft core and ext components release CLI tool package.
+Swoft 核心和扩展组件的版本发布工具.
 
-- Synchronize the latest changes to each sub-repository
-- Batch release of new versions
+- 同步最新改动到各个子仓库
+- 批量的发布新版本
 
 > Github: https://github.com/swoftlabs/swoft-releasecli
 
@@ -14,17 +14,19 @@ Swoft core and ext components release CLI tool package.
 - swoole
 - composer
 
-## [中文说明](README.zh-CN.md)
+## [English](README.md)
 
-## Install
+## 安装
 
-### Install by script
+### 脚本安装
 
 ```bash
 curl https://raw.githubusercontent.com/swoftlabs/swoft-releasecli/master/install.sh | bash
 ```
 
-### Manual install
+### 手动安装
+
+内容来自于 [install.sh](install.sh) 脚本
 
 ```bash
 cd ~
@@ -35,14 +37,14 @@ ln -s $PWD/bin/releasecli /usr/local/bin/releasecli
 chmod a+x bin/releasecli
 ```
 
-## Usage
+## 使用
 
-Goto swoft components dir, then:
+先用git拉取最新的 swoft-components 或 swoft-ext 到本地，跳转到仓库目录，执行：
 
 ```bash
 # 1. add remote for all components
-
 releasecli git:addrmt --all
+
 # 2. force push all change to every github repo
 releasecli git:fpush --all
 
@@ -50,17 +52,17 @@ releasecli git:fpush --all
 releasecli git:release --all -y -t v2.0.8
 ```
 
-## Update
+## 更新工具
 
-### Builtin command
+### 内置命令更新
 
-Use builtin command for update tool to latest
+Use builtin command
 
 ```bash
 releasecli upself
 ```
 
-### Manual update
+### 手动更新
 
 ```bash
 cd ~/swoft-releasecli
@@ -68,7 +70,7 @@ git pull
 chmod a+x bin/releasecli
 ```
 
-## Build Phar
+## 构建Phar
 
 > Required the `swoftcli`
 
@@ -76,14 +78,14 @@ chmod a+x bin/releasecli
 php -d phar.readonly=0 ~/.composer/vendor/bin/swoftcli phar:pack -o=releasecli.phar
 ```
 
-## Uninstall
+## 删除工具
 
 ```bash
 rm -f /usr/local/bin/releasecli
 rm -rf ~/swoft-releasecli
 ```
 
-## Dep Packages
+## 依赖包
 
 - https://github.com/php-toolkit/cli-utils
 - https://github.com/swoft-cloud/swoft-console
