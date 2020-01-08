@@ -1,3 +1,5 @@
+# PR
+
 - 请不要提交PR到各个组件仓库，它们都是 **只读的**
 - 核心组件的 **开发仓库** 是 **[swoft/swoft-component][core]**
 - 扩展组件的 **开发仓库** 是 **[swoft/swoft-ext][ext]**

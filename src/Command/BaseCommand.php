@@ -56,7 +56,7 @@ abstract class BaseCommand
      * @param App    $app
      * @param string $allOpt Default is --all
      *
-     * @return Generator|void
+     * @return Generator|void Has '/' on path end.
      */
     protected function findComponents(App $app, string $allOpt = 'all')
     {

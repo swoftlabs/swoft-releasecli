@@ -5,6 +5,7 @@
  */
 
 use SwoftLabs\ReleaseCli\Command\DeleteRemoteTag;
+use SwoftLabs\ReleaseCli\Command\GenCommonFile;
 use SwoftLabs\ReleaseCli\Command\GenReadme;
 use SwoftLabs\ReleaseCli\Command\GenVersion;
 use SwoftLabs\ReleaseCli\Command\GitAddRemote;
@@ -20,7 +21,10 @@ require __DIR__ . '/bootstrap.php';
 
 define('BASE_PATH', dirname(__DIR__));
 
-$cli = new App();
+$cli = new App([
+    'desc' => 'Swoft core and ext components release CLI tool application',
+]);
+
 $cli->addByConfig($gi = new GitFindTag(), $gi->getHelpConfig());
 $cli->addByConfig($drt = new DeleteRemoteTag(), $drt->getHelpConfig());
 $cli->addByConfig($grt = new GitReleaseTag(), $grt->getHelpConfig());
@@ -33,6 +37,7 @@ $cli->addObject(new GenReadme());
 $cli->addObject(new GenVersion());
 $cli->addObject(new UpdateSwooleVer());
 $cli->addObject(new ListComponents());
+$cli->addObject(new GenCommonFile());
 
 if (!defined('IN_PHAR') || !IN_PHAR) {
     $cli->addObject(new UpdateSelf());
