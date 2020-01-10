@@ -17,6 +17,7 @@ use function ceil;
 use function count;
 use function ksort;
 use function sprintf;
+use function time;
 
 /**
  * Class GitForcePush
@@ -79,6 +80,7 @@ STR;
 
         Color::println("will handled component number: $counts");
 
+        $start = time();
         if ($counts === 1) {
             $name = basename($subDirs[0]);
             $cmd  = sprintf(self::TPL, $name, $name, $targetBranch);
@@ -91,7 +93,10 @@ STR;
             $result = $this->coroutineRun($subDirs);
         }
 
-        Color::println("\nForce Push Complete(total: $counts)", 'cyan');
+        $end  = time();
+        $diff = sprintf('%.2f', ($end - $start) / 60);
+
+        Color::println("\nForce Push Complete(total: $counts, time: $diff mins)", 'cyan');
         if ($result) {
             ksort($result);
             Show::aList($result);
