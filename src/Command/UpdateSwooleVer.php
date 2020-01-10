@@ -52,7 +52,7 @@ STR;
     {
         $defVersion = '';
         if (defined('SWOOLE_VERSION')) {
-            $defVersion = 'v' . SWOOLE_VERSION;
+            $defVersion = SWOOLE_VERSION;
         }
 
         if (!$version = $app->getStrOpt('v', $defVersion)) {
@@ -87,23 +87,29 @@ STR;
     private function updateSwooleVersion(string $file, string $cptName): void
     {
         if (!file_exists($file)) {
-            Color::println("Skip the component: $cptName", 'mga');
+            Color::println("Skip the $cptName", 'magenta');
             return;
         }
 
         $updated = 0;
         // .../swoole-src/archive/v4.4.1.tar.gz
-        $regexp  = '#swoole-src/archive/(v\d.\d.\d).tar.gz#';
+        $regexp  = '#swoole-src/archive/(v\d+.\d+.\d+).tar.gz#';
         $replace = "swoole-src/archive/{$this->version}.tar.gz";
-        $content = file_get_contents($file);
+
+        // $content = 'wget https://github.com/swoole/swoole-src/archive/v4.4.12.tar.gz -O swoole';
+        // $content = preg_replace($regexp, $replace, $content, 1, $updated);
 
         // replace
+        $content = file_get_contents($file);
         $content = preg_replace($regexp, $replace, $content, 1, $updated);
+
+        $status = 'FAIL';
         if ($updated) {
+            $status = 'OK';
             $this->updated++;
         }
 
-        Color::println("- Updated the component: $cptName");
+        Color::println("- Update: $cptName $status");
 
         file_put_contents($file, $content);
     }
