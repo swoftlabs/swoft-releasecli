@@ -6,9 +6,9 @@ use Toolkit\Cli\App;
 use Toolkit\Cli\Color;
 
 /**
- * Class UpdateSelf
+ * Class GitPullUpdate
  */
-class UpdateSelf extends BaseCommand
+class GitPullUpdate extends BaseCommand
 {
     public function getHelpConfig(): array
     {
@@ -19,8 +19,8 @@ Example:
 STR;
 
         return [
-            'name' => 'upself',
-            'desc' => 'update self to latest by git pull',
+            'name' => 'git:up',
+            'desc' => 'update all codes to latest by git pull',
             'help' => $help,
         ];
     }
@@ -32,15 +32,10 @@ STR;
     {
         Color::println('Update to latest:');
 
-        $cmd = "cd {$this->baseDir} && git checkout . && git pull";
+        $cmd = 'git checkout . && git pull';
         $ret = self::exec($cmd);
 
         echo $ret['output'];
-
-        Color::println('Add execute perm:');
-
-        $binName = $app->getScriptName();
-        self::exec("cd {$this->baseDir} && chmod a+x bin/$binName");
 
         Color::println('Complete');
     }

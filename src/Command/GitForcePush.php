@@ -71,11 +71,11 @@ STR;
         $this->branch = $targetBranch = 'master';
         $this->debug  = $app->getBoolOpt('debug');
 
-        Color::println('update codes to latest by git pull');
-        self::exec('git checkout . && git pull');
-
         $subDirs = $this->subDirs = $this->allComponents($app);
         $counts  = count($subDirs);
+
+        Color::println('update codes to latest by git pull');
+        self::exec('git checkout . && git pull');
 
         Color::println("will handled component number: $counts");
 

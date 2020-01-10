@@ -11,6 +11,7 @@ use SwoftLabs\ReleaseCli\Command\GenVersion;
 use SwoftLabs\ReleaseCli\Command\GitAddRemote;
 use SwoftLabs\ReleaseCli\Command\GitFindTag;
 use SwoftLabs\ReleaseCli\Command\GitForcePush;
+use SwoftLabs\ReleaseCli\Command\GitPullUpdate;
 use SwoftLabs\ReleaseCli\Command\GitReleaseTag;
 use SwoftLabs\ReleaseCli\Command\ListComponents;
 use SwoftLabs\ReleaseCli\Command\UpdateSelf;
@@ -38,6 +39,7 @@ $cli->addObject(new GenVersion());
 $cli->addObject(new UpdateSwooleVer());
 $cli->addObject(new ListComponents());
 $cli->addObject(new GenCommonFile());
+$cli->addObject(new GitPullUpdate());
 
 if (!defined('IN_PHAR') || !IN_PHAR) {
     $cli->addObject(new UpdateSelf());
