@@ -11,6 +11,7 @@ use Toolkit\Cli\App;
 use Toolkit\Cli\Color;
 use function count;
 use function sprintf;
+use function time;
 
 /**
  * Class GitReleaseTag
@@ -84,6 +85,8 @@ STR;
             return;
         }
 
+        $start = time();
+
         // $targetBranch = 'master';
         $makeTmpDir = "rm -rf {$this->tmpDir} && mkdir {$this->tmpDir}";
 
@@ -103,9 +106,12 @@ STR;
 
         $runner->start();
 
+        $end  = time();
+        $diff = sprintf('%.2f', ($end - $start) / 60);
+
         $total  = count($this->result);
         $result = $this->result;
-        Color::println("\nRelease Tag({$newTag}) Complete(total: $total)", 'cyan');
+        Color::println("\nRelease Tag({$newTag}) Complete(total: $total, time: $diff mins)", 'cyan');
 
         ksort($result);
         Show::aList($result);
