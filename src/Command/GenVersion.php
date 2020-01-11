@@ -8,6 +8,7 @@ use function basename;
 use function dirname;
 use function file_get_contents;
 use function file_put_contents;
+use function preg_match;
 use function preg_replace;
 use function sprintf;
 use function str_replace;
@@ -20,7 +21,7 @@ use function str_replace;
 class GenVersion extends BaseCommand
 {
     public const ADD_POSITION  = '"type": "library",';
-    public const MATCH_VERSION = '/"version": "[\w.]+"/';
+    public const MATCH_VERSION = '/"version": "([\w.]+)"/';
 
     /**
      * @var string
@@ -65,16 +66,16 @@ STR;
             return;
         }
 
-        $this->version = $version;
+        $this->version = 'v' . trim($version, 'v');
 
-        echo Color::render("Input new version is: $version\n", 'info');
+        echo Color::render("Input new version is: {$this->version}\n", 'info');
 
         foreach ($this->findComponents($app) as $dir) {
             $this->addVersionToComposer($dir . 'composer.json', basename($dir));
         }
 
         if ($this->updated > 0 && $app->getBoolOpt('c')) {
-            self::gitCommit("update: add {$this->version} for all component composer.json");
+            self::gitCommit("update: add {$this->version} for package composer.json");
         }
 
         echo Color::render("Complete\n", 'cyan');
@@ -86,32 +87,36 @@ STR;
      */
     private function addVersionToComposer(string $file, string $name = ''): void
     {
-        $text = file_get_contents($file);
-        $name = $name ?: basename(dirname($file));
+        $count = 0;
+        $name  = $name ?: basename(dirname($file));
 
-        // New version line
+        $content = file_get_contents($file);
         $replace = sprintf('"version": "%s"', $this->version);
 
-        $count = 0;
-        $text  = preg_replace(self::MATCH_VERSION, $replace, $text, 1, $count);
+        preg_match(self::MATCH_VERSION, $content, $matches);
 
         // Not found, is first add.
-        if (1 !== $count) {
+        if (!isset($matches[1])) {
             $replace = self::ADD_POSITION . "\n  {$replace},";
-            $text    = str_replace(self::ADD_POSITION, $replace, $text, $count);
+            $content = str_replace(self::ADD_POSITION, $replace, $content, $count);
+        } else {
+            if ($matches[1] === $this->version) {
+                Color::println("Version is no changed, skip: $name");
+                return;
+            }
 
-            $this->updated++;
+            $content = preg_replace(self::MATCH_VERSION, $replace, $content, 1, $count);
         }
 
         if (0 === $count) {
-            echo Color::render("Failed for add version for component: $name\n", 'error');
+            Color::println("Failed add version for component: $name\n", 'error');
             return;
         }
 
-        $this->updated += $count;
+        $this->updated++;
 
-        echo Color::render("Append version for the component: $name\n", 'info');
+        Color::println("Append version for the component: $name\n", 'info');
 
-        file_put_contents($file, $text);
+        file_put_contents($file, $content);
     }
 }
