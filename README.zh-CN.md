@@ -1,11 +1,13 @@
 # Swoft Release CLI
 
+[![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/swoftlabs/swoft-releasecli)](https://github.com/swoftlabs/swoft-releasecli)
+
 Swoft 核心和扩展组件的版本发布工具.
 
 - 同步最新改动到各个子仓库
 - 批量的发布新版本
 
-> Github: https://github.com/swoftlabs/swoft-releasecli
+> Github https://github.com/swoftlabs/swoft-releasecli
 
 **环境依赖:**
 

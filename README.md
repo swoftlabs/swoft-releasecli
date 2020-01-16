@@ -1,5 +1,7 @@
 # Swoft Release CLI
 
+[![GitHub tag (latest SemVer)](https://img.shields.io/github/tag/swoftlabs/swoft-releasecli)](https://github.com/swoftlabs/swoft-releasecli)
+
 Swoft core and ext components release CLI tool package.
 
 - Synchronize the latest changes to each sub-repository
