@@ -49,8 +49,8 @@ Execute:
 
 ```bash
 # 1. add remote for all components
-
 releasecli git:addrmt --all
+
 # 2. force push all change to every github repo
 releasecli git:fpush --all
 
