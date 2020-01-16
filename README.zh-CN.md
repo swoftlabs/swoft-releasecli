@@ -9,13 +9,6 @@ Swoft 核心和扩展组件的版本发布工具.
 
 > Github https://github.com/swoftlabs/swoft-releasecli
 
-**环境依赖:**
-
-- git
-- php
-- swoole
-- composer
-
 **工具预览:**
 
 ![all-commands](all-commands.png)
@@ -23,6 +16,13 @@ Swoft 核心和扩展组件的版本发布工具.
 ## [English](README.md)
 
 ## 安装
+
+**环境依赖:**
+
+- git
+- php
+- swoole
+- composer
 
 ### 脚本安装
 

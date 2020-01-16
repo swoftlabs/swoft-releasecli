@@ -9,13 +9,6 @@ Swoft core and ext components release CLI tool package.
 
 > Github https://github.com/swoftlabs/swoft-releasecli
 
-**Required:**
-
-- git
-- php
-- swoole
-- composer
-
 **Preview:**
 
 ![all-commands](all-commands.png)
@@ -23,6 +16,13 @@ Swoft core and ext components release CLI tool package.
 ## [中文说明](README.zh-CN.md)
 
 ## Install
+
+**Required:**
+
+- git
+- php
+- swoole
+- composer
 
 ### Install by script
 
