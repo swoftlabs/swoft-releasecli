@@ -5,7 +5,7 @@ Swoft core and ext components release CLI tool package.
 - Synchronize the latest changes to each sub-repository
 - Batch release of new versions
 
-> Github: https://github.com/swoftlabs/swoft-releasecli
+> Github https://github.com/swoftlabs/swoft-releasecli
 
 **Required:**
 
@@ -13,6 +13,10 @@ Swoft core and ext components release CLI tool package.
 - php
 - swoole
 - composer
+
+**Preview:**
+
+![all-commands](all-commands.png)
 
 ## [中文说明](README.zh-CN.md)
 
