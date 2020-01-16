@@ -10,11 +10,11 @@ use Toolkit\Cli\Color;
 use function basename;
 
 /**
- * Class DeleteRemoteTag
+ * Class GitDeleteTag
  *
  * @package SwoftLabs\ReleaseCli\Command
  */
-class DeleteRemoteTag extends BaseCommand
+class GitDeleteTag extends BaseCommand
 {
     /**
      * @var array

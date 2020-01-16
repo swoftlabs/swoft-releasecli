@@ -4,7 +4,7 @@
  * Internal develop tool for swoft
  */
 
-use SwoftLabs\ReleaseCli\Command\DeleteRemoteTag;
+use SwoftLabs\ReleaseCli\Command\GitDeleteTag;
 use SwoftLabs\ReleaseCli\Command\GenCommonFile;
 use SwoftLabs\ReleaseCli\Command\GenReadme;
 use SwoftLabs\ReleaseCli\Command\GenVersion;
@@ -27,14 +27,14 @@ $cli = new App([
 ]);
 
 $cli->addByConfig($gi = new GitFindTag(), $gi->getHelpConfig());
-$cli->addByConfig($drt = new DeleteRemoteTag(), $drt->getHelpConfig());
-$cli->addByConfig($grt = new GitReleaseTag(), $grt->getHelpConfig());
-$cli->addByConfig($gar = new GitAddRemote(), $gar->getHelpConfig());
+$cli->addObject(new GitDeleteTag());
+$cli->addObject(new GitReleaseTag());
+$cli->addObject(new GitAddRemote());
 $cli->addObject(new GitForcePush());
 // $cli->addByConfig($gsp1 = new GitSubtreePush(), $gsp1->getHelpConfig());
 // $cli->addByConfig($gsp2 = new GitSubtreePull(), $gsp2->getHelpConfig());
 
-$cli->addObject(new GenReadme());
+// $cli->addObject(new GenReadme());
 $cli->addObject(new GenVersion());
 $cli->addObject(new UpdateSwooleVer());
 $cli->addObject(new ListComponents());
