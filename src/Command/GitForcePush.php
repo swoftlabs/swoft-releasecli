@@ -81,16 +81,11 @@ STR;
         Color::println("will handled component number: $counts");
 
         $start = time();
-        if ($counts === 1) {
-            $name = basename($subDirs[0]);
-            $cmd  = sprintf(self::TPL, $name, $name, $targetBranch);
-            $ok   = $this->pushToRepo($cmd, $name);
-
-            $result[$name] = $ok ? 'OK' : 'FAIL';
-        } elseif ($app->getStrOpt('mode', 'p') === 'p') {
-            $result = $this->processRun($subDirs);
-        } else {
+        $mode  = $app->getStrOpt('mode', 'p');
+        if ($counts === 1 || $mode === 'c') {
             $result = $this->coroutineRun($subDirs);
+        } else {
+            $result = $this->processRun($subDirs);
         }
 
         $end  = time();
