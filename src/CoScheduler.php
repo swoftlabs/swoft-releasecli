@@ -4,7 +4,7 @@ namespace SwoftLabs\ReleaseCli;
 
 use RuntimeException;
 use Swoole\Coroutine;
-use Swoole\Coroutine\Scheduler as CoScheduler;
+use Swoole\Coroutine\Scheduler;
 use Swoole\Event;
 
 /**
@@ -63,7 +63,7 @@ class CoScheduler
 
         // >= 4.4
         if ($this->isGteSwoole44()) {
-            $scheduler = new CoScheduler;
+            $scheduler = new Scheduler;
 
             foreach ($this->handlers as [$callable, $args]) {
                 $scheduler->add($callable, ...$args);
