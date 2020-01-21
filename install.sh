@@ -7,9 +7,9 @@ set -ex
 
 cd ~ || exit
 # download tool
-git clone https://github.com/swoftlabs/swoft-releasecli
+git clone https://github.com/swoftlabs/swoft-releasecli .swoft-releasecli
 # shellcheck disable=SC2164
-cd swoft-releasecli
+cd .swoft-releasecli
 # intall dep packages
 composer install
 # add exec perm
