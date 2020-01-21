@@ -109,14 +109,16 @@ STR;
         }
 
         if (0 === $count) {
-            Color::println("Failed add version for component: $name\n", 'error');
+            Color::println("Failed add version for component: $name", 'error');
             return;
         }
 
         $this->updated++;
 
-        Color::println("Append version for the component: $name\n", 'info');
+        // TODO if $name = framework
+        // public const VERSION = '2.0.7';
 
+        Color::println("Append version for the component: $name", 'info');
         file_put_contents($file, $content);
     }
 }
