@@ -34,8 +34,8 @@ curl https://raw.githubusercontent.com/swoftlabs/swoft-releasecli/master/install
 
 ```bash
 cd ~
-git clone https://github.com/swoftlabs/swoft-releasecli
-cd swoft-releasecli
+git clone https://github.com/swoftlabs/swoft-releasecli .swoft-releasecli
+cd .swoft-releasecli
 composer install
 ln -s $PWD/bin/releasecli /usr/local/bin/releasecli
 chmod a+x bin/releasecli
