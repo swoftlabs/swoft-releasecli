@@ -5,6 +5,7 @@ namespace SwoftLabs\ReleaseCli\Command;
 use Swoft\Stdlib\Helper\Dir;
 use Toolkit\Cli\App;
 use Toolkit\Cli\Color;
+use function array_values;
 use function basename;
 use function dirname;
 use function file_get_contents;
@@ -34,7 +35,9 @@ class GenCommonFile extends BaseCommand
         'README.tpl.md'       => 'README.md',
         'README.zh-CN.tpl.md' => 'README.zh-CN.md',
         'pull-request.tpl.md' => '.github/PULL_REQUEST_TEMPLATE.md',
+        'issue-config.yml'    => '.github/ISSUE_TEMPLATE/config.yml',
     ];
+
     /**
      * @var string
      */
@@ -47,6 +50,8 @@ class GenCommonFile extends BaseCommand
 
     public function getHelpConfig(): array
     {
+        $files = implode("\n- ", array_values($this->tplFiles));
+
         $help = <<<STR
 Arguments:
   names   The component names
@@ -59,6 +64,10 @@ Example:
   {{command}} --all
   {{command}} http-server
   {{command}} http-server http-message
+
+Will generate there are files:
+
+- {$files}
 
 STR;
 
@@ -76,10 +85,6 @@ STR;
     {
         $tplDir = $this->baseDir . '/template/';
 
-        foreach ($this->tplFiles as $tplFile => $targetFile) {
-            $this->contents[$targetFile] = file_get_contents($tplDir . $tplFile);
-        }
-
         $defVersion = '';
         if (defined('SWOOLE_VERSION')) {
             $defVersion = SWOOLE_VERSION;
@@ -88,6 +93,10 @@ STR;
         if (!$version = $app->getStrOpt('v', $defVersion)) {
             echo Color::render("Please input an swoole version by option: -v\n", 'error');
             return;
+        }
+
+        foreach ($this->tplFiles as $tplFile => $targetFile) {
+            $this->contents[$targetFile] = file_get_contents($tplDir . $tplFile);
         }
 
         Color::println('Generate common files for components');
