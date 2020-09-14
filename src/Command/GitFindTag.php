@@ -77,7 +77,7 @@ STR;
             return;
         }
 
-        Color::println("<info>$title</info> $tagName\n");
+        Color::printf("<info>%s</info> $tagName\n", $title);
     }
 
     /**
