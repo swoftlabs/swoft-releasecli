@@ -5,9 +5,9 @@ namespace SwoftLabs\ReleaseCli\Command;
 use Toolkit\Cli\App;
 use Toolkit\Cli\Color;
 use function basename;
-use function dirname;
 use function file_get_contents;
 use function file_put_contents;
+use function ltrim;
 use function preg_match;
 use function preg_replace;
 use function sprintf;
@@ -71,7 +71,7 @@ STR;
         echo Color::render("Input new version is: {$this->version}\n", 'info');
 
         foreach ($this->findComponents($app) as $dir) {
-            $this->addVersionToComposer($dir . 'composer.json', basename($dir));
+            $this->addVersionToComposer($dir, basename($dir));
         }
 
         if ($this->updated > 0 && $app->getBoolOpt('c')) {
@@ -82,13 +82,14 @@ STR;
     }
 
     /**
-     * @param string $file
+     * @param string $dir
      * @param string $name
      */
-    private function addVersionToComposer(string $file, string $name = ''): void
+    private function addVersionToComposer(string $dir, string $name = ''): void
     {
         $count = 0;
-        $name  = $name ?: basename(dirname($file));
+        $file  = $dir . 'composer.json';
+        $name  = $name ?: basename($dir);
 
         $content = file_get_contents($file);
         $replace = sprintf('"version": "%s"', $this->version);
@@ -114,11 +115,23 @@ STR;
         }
 
         $this->updated++;
+        Color::println("- Change version for the component: $name", 'info');
 
-        // TODO if $name = framework
-        // public const VERSION = '2.0.7';
+        // special handle
+        // - public const VERSION = '2.0.7';
+        if ($name === 'framework') {
+            $version = ltrim($this->version, 'v');
+            $swoftC  = $dir . '/src/Swoft.php';
+            $swoftT = file_get_contents($swoftC);
+            preg_match("/VERSION = '([\w.]+)';/", $swoftT, $matches);
+            if ($matches[1] !== $version) {
+                Color::println("  - Update the constant Swoft::VERSION");
 
-        Color::println("Append version for the component: $name", 'info');
+                $swoftT = str_replace("'{$matches[1]}'", "'{$version}'", $swoftT);
+                file_put_contents($swoftC, $swoftT);
+            }
+        }
+
         file_put_contents($file, $content);
     }
 }
