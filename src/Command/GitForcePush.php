@@ -130,7 +130,7 @@ STR;
      */
     protected function processRun(array $subDirs): array
     {
-        $workNum = (int)ceil($this->cpuNum * 2);
+        $workNum = (int)ceil($this->cpuNum * 3);
         $allNum  = count($subDirs);
 
         if ($allNum <= $workNum) {
